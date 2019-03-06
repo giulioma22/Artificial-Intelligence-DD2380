@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Iterator;
-import java.util.logging.Logger;
-import java.util.Arrays;
 
 class Player {
 
@@ -11,8 +9,6 @@ class Player {
     double best_prob;
     HMM3 model;
 
-    Logger logger;
-
     ArrayList<HMM3>[] HMM_list;
 
 
@@ -20,12 +16,10 @@ class Player {
 
     public Player() {
 
-        logger = Logger.getLogger("My Logger");
-
         HMM_list = new ArrayList[Constants.COUNT_SPECIES];
         HMM3[] models = new HMM3[Constants.COUNT_SPECIES];
         for (int i = 0; i < Constants.COUNT_SPECIES; i++){
-            models[i] = new HMM3(6, 9, 1, -1, null);
+            models[i] = new HMM3(6, 9, -1, null);
             HMM_list[i] = new ArrayList();
             HMM_list[i].add(models[i]);
         }
@@ -66,7 +60,6 @@ class Player {
                 int T = 0;
                 int N = 5;
                 int M = 9;
-                int nRows = 1;
 
                 if (bird.isDead()){
                     continue;
@@ -85,7 +78,7 @@ class Player {
                     obs_sequence[k] = bird.getObservation(k);
                 }
 
-                HMM3 model = new HMM3(N, M, nRows, T, obs_sequence);
+                HMM3 model = new HMM3(N, M, T, obs_sequence);
 
                 model.HMM_algorithm();
                 model.validate();
@@ -114,14 +107,7 @@ class Player {
             // System.err.println("maxSum is: " + maxSum + " bestIdx is: " + bestIdx);
 
             if (maxSum > 0.7 && bestIdx != 5){
-              // logger.info("Targetig Bird with {Action, Prob, Specie, shootLikeli, sum}: "
-              //     + Integer.toString(bestBird)
-              //     + " " + Integer.toString(bestMove)
-              //     + " " + Double.toString(bestGuessProb)
-              //     + " " + Integer.toString(bestIdx)
-              //     + " " + Double.toString(highest_prob)
-              //     + " " + Double.toString(maxSum));
-                  return new Action(bestBird, bestMove);
+                return new Action(bestBird, bestMove);
             }
 
         }
@@ -150,12 +136,6 @@ class Player {
         //This is the list of guesses that we'll make
         int[] lGuess = new int[pState.getNumBirds()];
 
-        // VVV - MIGHT BE USELESS - VVV
-        //Here we initialize it to be guessing only pidgeons (0)
-        for (int i = 0; i < pState.getNumBirds(); ++i) {
-            lGuess[i] = Constants.SPECIES_PIGEON;
-        }
-
         //Calculating actual length of observations for each bird
         for (int i = 0; i < pState.getNumBirds(); i++) {
             Bird bird = pState.getBird(i);
@@ -178,8 +158,6 @@ class Player {
             lGuess[i] = classifyBird(obs_sequence);
 
         }
-
-        System.err.println("Guessing: " + Arrays.toString(lGuess));
 
         return lGuess;
     }
@@ -252,11 +230,11 @@ class Player {
                 }
 
                 //Calculate the HMM model
-                HMM3 second_model = new HMM3(6, 9, 1, -1, null);
-                second_model.updateObsSeq(T, obs_sequence);
-                second_model.HMM_algorithm();
+                HMM3 model = new HMM3(6, 9, -1, null);
+                model.updateObsSeq(T, obs_sequence);
+                model.HMM_algorithm();
 
-                HMM_list[pSpecies[i]].add(second_model);
+                HMM_list[pSpecies[i]].add(model);
 
             }
         }

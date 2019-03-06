@@ -5,14 +5,14 @@ public class HMM3{
 
     double[][] transition;
     double[][] emission;
-    double[][] initial_prob;
+    double[] initial_prob;
     int[] obs_sequence;
 
     double lastdist[][];
 
     Random random;
 
-    int N, M, T, nRows;
+    int N, M, T;
     double multiplier = 0.2;
     long seed = (long)5000000000.0;
     double[] info;
@@ -21,38 +21,37 @@ public class HMM3{
     // - - - - - - DUCK HUNT IMPLEMENTATIONS - - - - - -
 
 
-    public HMM3(int N, int M, int nRows, int T, int[] obs_sequence){
+    public HMM3(int N, int M, int T, int[] obs_sequence){
         random = new Random(seed);
 
         this.N = N;
         this.M = M;
-        this.nRows = nRows;
-        this.transition = new double[this.N][this.N];
-        this.emission = new double[this.N][this.M];
-        this.initial_prob = new double[this.nRows][this.N];
+        this.transition = new double[N][N];
+        this.emission = new double[N][M];
+        this.initial_prob = new double[N];
 
         //A Matrix - Transition
 
-        for (int i = 0; i < this.N; i++) {
-            double holder = 0;
-            for (int t = 0; t < this.N; t++) {
-                this.transition[i][t] = 1 / this.N + random.nextDouble() * multiplier / this.N;
+        for (int i = 0; i < N; i++) {
+            double holder = 0.0;
+            for (int t = 0; t < N; t++) {
+                this.transition[i][t] = 1.0 / N + random.nextDouble() * multiplier / N;
                 holder += this.transition[i][t];
             }
-            for (int j = 0; j < this.N; j++) {
+            for (int j = 0; j < N; j++) {
                 this.transition[i][j] = this.transition[i][j] / holder;
             }
         }
 
         //B Matrix - Emission
 
-        for (int i = 0; i < this.N; i++) {
-            double holder = 0;
-            for (int t = 0; t < this.M; t++) {
-                this.emission[i][t] = 1 / this.M + random.nextDouble() * multiplier / this.M;
+        for (int i = 0; i < N; i++) {
+            double holder = 0.0;
+            for (int t = 0; t < M; t++) {
+                this.emission[i][t] = 1.0 / M + random.nextDouble() * multiplier / M;
                 holder += this.emission[i][t];
             }
-            for (int j = 0; j < this.M; j++){
+            for (int j = 0; j < M; j++){
                 this.emission[i][j] = this.emission[i][j] / holder;
             }
 
@@ -60,13 +59,13 @@ public class HMM3{
 
         //Initial probability
 
-        double holder = 0;
-        for (int i = 0; i < this.N; i++) {
-            initial_prob[0][i] = 1 / this.N + random.nextDouble() * multiplier / this.N;
-            holder += initial_prob[0][i];
+        double holder = 0.0;
+        for (int i = 0; i < N; i++) {
+            initial_prob[i] = 1.0 / N + random.nextDouble() * multiplier / N;
+            holder += initial_prob[i];
         }
-        for (int i = 0; i < this.N; i++){
-            initial_prob[0][i] =  initial_prob[0][i] /holder;
+        for (int i = 0; i < N; i++){
+            initial_prob[i] =  initial_prob[i] /holder;
         }
 
         //Observation sequence
@@ -83,89 +82,85 @@ public class HMM3{
 
     public void HMM_algorithm(){
 
-        double[][] conv = new double[1][this.T];
-
-        double[][] alpha = new double[this.T][this.N];
-        double[][] beta = new double[this.T][this.N];
-        double[][] digamma;
-        double[][] gamma = new double[this.T][this.N];
-
-        ArrayList<double[][]> matrix_3D = new ArrayList<>();
-
-        double iters = 1;
+        double iters = 0;
         double numerator;
         double denominator;
         double sum;
         double old_log = -1000000;
-        double log_prob = 0;
+        double log_prob = 0.0;
         double c0;
         double ct;
 
-        while (iters < this.T && log_prob > old_log) {
+        ArrayList<double[][]> matrix_3D = new ArrayList<>();
+
+        while (iters < T && log_prob > old_log) {
+
+            double[][] alpha = new double [T][N];
+            double[] conv = new double[T];
+            double[][] beta = new double[T][N];
+            double[][] gamma = new double[T][N];
+            double[][] digamma;
 
             //Alpha
 
-            for (int t = 0; t < this.T; t++) {
+            for (int t = 0; t < T; t++) {
                 if (t == 0) {
-                    c0 = 0;
-                    for (int i = 0; i < this.N; i++) {
-                        alpha[0][i] = this.initial_prob[0][i] * this.emission[i][this.obs_sequence[0]];
+                    c0 = 0.0;
+                    for (int i = 0; i < N; i++) {
+                        alpha[0][i] = this.initial_prob[i] * this.emission[i][this.obs_sequence[0]];
                     c0 += alpha[0][i];
                     }
-                    c0 = 1/c0;
-                    for (int i = 0; i < this.N; i++) {
+                    c0 = 1.0/c0;
+                    for (int i = 0; i < N; i++) {
                         alpha[0][i] = c0 * alpha[0][i];
                     }
-                    conv[0][0] = c0;
+                    conv[0] = c0;
 
                 } else {
-                    ct = 0;
-                    for (int i = 0; i < this.N; i++) {
-                        sum = 0;
-                        for (int j = 0; j < this.N; j++) {
+                    ct = 0.0;
+                    for (int i = 0; i < N; i++) {
+                        sum = 0.0;
+                        for (int j = 0; j < N; j++) {
                             sum += alpha[t - 1][j] * this.transition[j][i];
                         }
                         alpha[t][i] = sum * this.emission[i][this.obs_sequence[t]];
                         ct += alpha[t][i];
                     }
-                    ct = 1/ct;
-                    for (int i = 0; i < this.N; i++) {
+                    ct = 1.0/ct;
+                    for (int i = 0; i < N; i++) {
                         alpha[t][i] = ct * alpha[t][i];
                     }
-                    conv[0][t] = ct;
+                    conv[t] = ct;
                 }
             }
 
-            //print2D(alpha);
 
             //Beta
 
-            for (int i = 0; i < this.N; i++) {
-                beta[this.T-1][i] = conv[0][this.T-1];
+            for (int i = 0; i < N; i++) {
+                beta[T-1][i] = conv[T-1];
             }
 
-            for (int t = this.T-2; t >= 0; t--) {
-                for (int i = 0; i < this.N; i++) {
-                    sum = 0;
-                    for (int j = 0; j < this.N; j++) {
+            for (int t = T-2; t >= 0; t--) {
+                for (int i = 0; i < N; i++) {
+                    sum = 0.0;
+                    for (int j = 0; j < N; j++) {
                         sum += beta[t+1][j] * this.emission[j][this.obs_sequence[t+1]] * this.transition[i][j];
                     }
-                    sum = conv[0][t] * sum;
+                    sum = conv[t] * sum;
                     beta[t][i] = sum;
                 }
             }
-
-            //print2D(beta);
 
             //Di-Gamma and Gamma
 
             matrix_3D.clear();
 
-            for (int t = 0; t < this.T-1; t++) {
-                digamma = new double[this.N][this.N];
-                for (int i = 0; i < this.N; i++) {
+            for (int t = 0; t < T-1; t++) {
+                digamma = new double[N][N];
+                for (int i = 0; i < N; i++) {
                     sum = 0;
-                    for (int j = 0; j < this.N; j++) {
+                    for (int j = 0; j < N; j++) {
                         digamma[i][j] = alpha[t][i] * this.transition[i][j] * this.emission[j][this.obs_sequence[t+1]] * beta[t+1][j];
                         sum += digamma[i][j];
                     }
@@ -174,77 +169,78 @@ public class HMM3{
                 matrix_3D.add(digamma);
             }
 
-            //print2D(gamma);
+            denominator = 0.0;
+            for(int i = 0; i < N; i++){
+                denominator += alpha[T-1][i];
+            }
+            for(int i = 0; i < N; i++){
+                gamma[T-1][i] = (alpha[T-1][i]) / denominator;
+            }
 
             //Initial probability
 
-            for (int i = 0; i < this.N; i++) {
-                this.initial_prob[0][i] = gamma[0][i];
+            for (int i = 0; i < N; i++) {
+                this.initial_prob[i] = gamma[0][i];
             }
 
             //For the validate function
-            this.lastdist = new double [1][this.N];
-            for(int i = 0; i < this.N; i++){
-                this.lastdist[0][i] = gamma[this.T-1][i];
+            this.lastdist = new double [1][N];
+            for(int i = 0; i < N; i++){
+                this.lastdist[0][i] = gamma[T-1][i];
             }
-
-            //print2D(initial_prob);
 
             //A Matrix
 
-            for (int i = 0; i < this.N; i++) {
+            for (int i = 0; i < N; i++) {
                 denominator = 0;
-                for (int t = 0; t < this.T - 1; t++) {
+                for (int t = 0; t < T - 1; t++) {
                     denominator += gamma[t][i];
                 }
-                for (int j = 0; j < this.N; j++) {
+                for (int j = 0; j < N; j++) {
                     numerator = 0;
-                    for (int t = 0; t < this.T - 1; t++) {
+                    for (int t = 0; t < T - 1; t++) {
                         numerator += matrix_3D.get(t)[i][j];
                     }
-                    this.transition[i][j] = numerator/denominator;    //Might want to check if den = 0
+                    this.transition[i][j] = numerator/denominator;
+
                 }
             }
 
-
-
-            //print2D(transition);
-
             //B Matrix
 
-            for (int i = 0; i < this.N; i++) {
+            for (int i = 0; i < N; i++) {
                 denominator = 0;
-                for (int t = 0; t < this.T; t++) {
+                for (int t = 0; t < T; t++) {
                     denominator += gamma[t][i];
                 }
-                for (int j = 0; j < this.M; j++) {
+                for (int j = 0; j < M; j++) {
                     numerator = 0;
-                    for (int t = 0; t < this.T; t++) {
+                    for (int t = 0; t < T; t++) {
                         if (this.obs_sequence[t] == j){
                             numerator += gamma[t][i];
                         }
                     }
                     this.emission[i][j] = numerator/denominator;
+
                 }
             }
 
-            //print2D(emission);
-
             //Calculating convergence
 
-            log_prob = 0;
-            for (int t = 0; t < this.T; t++) {
-                log_prob += Math.log(conv[0][t]);
+            log_prob = 0.0;
+            for (int t = 0; t < T; t++) {
+                log_prob += Math.log(1.0/conv[t]);
             }
             log_prob = -log_prob;
 
 
             iters += 1;
-            if (iters < this.T && log_prob > old_log){
+            if (iters < T && log_prob > old_log){
                 old_log = log_prob;
-                log_prob = 100;
+                log_prob = 100.0;
             }
         }
+
     }
 
 
@@ -252,16 +248,16 @@ public class HMM3{
 
     public void validate(){
 
-        double[] foo = new double[this.N];
+        double[] foo = new double[N];
         for (int i = 0; i < this.transition.length; i++) {
             double bar = 0.0;
-            for (int j = 0; j < this.initial_prob[0].length; j++) {
+            for (int j = 0; j < this.initial_prob.length; j++) {
                 bar += this.lastdist[0][j] * this.transition[j][i];
             }
             foo[i] = bar;
         }
 
-        double[] bar = new double[this.M];
+        double[] bar = new double[M];
         double temp_sum = 0.0;
         for (int i = 0; i < this.emission[0].length; i++) {
             double baz = 0.0;
@@ -272,12 +268,12 @@ public class HMM3{
             temp_sum += baz;
         }
 
-        for(int i=0; i<bar.length;i++){
+        for(int i = 0; i < bar.length; i++){
             if (temp_sum == 0.0){
                 bar[i] = 0.0;
             }
             else{
-                bar[i] = bar[i]/temp_sum;
+                bar[i] /= temp_sum;
             }
 
         }
@@ -300,24 +296,24 @@ public class HMM3{
 
 
     public double updateAlpha(int[] observations){
-        double prob = 0;
+        double prob = 0.0;
         double[][] alpha = new double[observations.length][this.N];
 
         for (int t = 0; t < observations.length; t++){
             if (t == 0){
-                for (int i = 0; i < this.N; i++){
-                    alpha[0][i] = this.initial_prob[0][i] * this.emission[i][observations[0]];
+                for (int i = 0; i < N; i++){
+                    alpha[0][i] = this.initial_prob[i] * this.emission[i][observations[0]];
                 }
             } else {
-                for (int i = 0; i < this.N; i++){
-                    for (int j = 0; j < this.N; j++){
+                for (int i = 0; i < N; i++){
+                    for (int j = 0; j < N; j++){
                         alpha[t][i] += alpha[t-1][j] * this.transition[j][i] * this.emission[i][observations[t]];
                     }
                 }
             }
         }
 
-        for (int i = 0; i < this.N; i++){
+        for (int i = 0; i < N; i++){
             prob += alpha[observations.length - 1][i];
         }
         return prob;
@@ -328,11 +324,11 @@ public class HMM3{
 
 
     public double ShotProb(){
-        double max = 0;
+        double max = 0.0;
         int maxIdx = 0;
-        for (int i = 0; i < this.info.length; i++){
-            if (this.info[i] > max){
-                max = this.info[i];
+        for (int i = 0; i < info.length; i++){
+            if (info[i] > max){
+                max = info[i];
                 maxIdx = i;
             }
         }
@@ -344,11 +340,11 @@ public class HMM3{
 
 
     public int ShootBird(){
-        double max = 0;
+        double max = 0.0;
         int maxIdx = 0;
-        for (int i = 0; i < this.info.length; i++){
-            if (this.info[i] > max){
-                max = this.info[i];
+        for (int i = 0; i < info.length; i++){
+            if (info[i] > max){
+                max = info[i];
                 maxIdx = i;
             }
         }
