@@ -8,6 +8,8 @@ public class HMM3{
     double[][] initial_prob;
     int[] obs_sequence;
 
+    double lastdist[][];
+
     Random random;
 
     int N, M, T, nRows;
@@ -119,6 +121,12 @@ public class HMM3{
                 this.initial_prob[0][i] = gamma[0][i];
             }
 
+            //For the validate function
+            this.lastdist = new double [1][this.N];
+            for(int i = 0; i < this.N; i++){
+                this.lastdist[0][i] = gamma[this.T-1][i];
+            }
+
             //print2D(initial_prob);
 
             //A Matrix
@@ -176,6 +184,46 @@ public class HMM3{
                 log_prob = 100;
             }
         }
+    }
+
+
+    // - - - - - - - - - - - - - - - - - - -
+
+    public void validate(){
+
+        double[] foo = new double[this.N];
+        for (int i = 0; i < this.transition.length; i++) {
+            double bar = 0.0;
+            for (int j = 0; j < this.initial_prob[0].length; j++) {
+                bar += this.lastdist[0][j] * this.transition[j][i];
+            }
+            foo[i] = bar;
+        }
+
+        double[] bar = new double[this.M];
+        double temp_sum = 0.0;
+        for (int i = 0; i < this.emission[0].length; i++) {
+            double baz = 0.0;
+            for (int j = 0; j < this.emission.length; j++) {
+                baz += foo[j] * this.emission[j][i];
+            }
+            bar[i] = baz;
+            temp_sum += baz;
+        }
+
+        for(int i=0; i<bar.length;i++){
+            if (temp_sum == 0.0){
+                bar[i] = 0.0;
+            }
+            else{
+                bar[i] = bar[i]/temp_sum;
+            }
+
+        }
+
+        this.info = bar;
+        // System.err.println("Bar: " + Arrays.toString(bar));
+
     }
 
 

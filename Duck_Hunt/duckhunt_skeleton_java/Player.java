@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Iterator;
+import java.util.logging.Logger;
+import java.util.Arrays;
 
 class Player {
 
@@ -9,12 +11,16 @@ class Player {
     double best_prob;
     HMM3 model;
 
+    Logger logger;
+
     ArrayList<HMM3>[] HMM_list;
 
 
     // - - - - - - PLAYER FUNCTION - - - - - -
 
     public Player() {
+
+        logger = Logger.getLogger("My Logger");
 
         HMM_list = new ArrayList[Constants.COUNT_SPECIES];
         HMM3[] models = new HMM3[Constants.COUNT_SPECIES];
@@ -82,10 +88,9 @@ class Player {
                 HMM3 model = new HMM3(N, M, nRows, T, obs_sequence);
 
                 model.HMM_algorithm();
-                // Missing
-                //model.validate();
+                model.validate();
 
-                int[][] temp_matrix = new int[0][0];
+                int[][] temp_matrix = new int[1][1];
                 temp_matrix[0][0] = bird.getLastObservation();
 
                 int idxBird = classifyBird(temp_matrix[0]);
@@ -106,8 +111,14 @@ class Player {
 
             //Shooting only if probability is high and it's not a black stork
             if (maxSum > 0.7 && bestIdx != 5){
-                // Missing
-                return new Action(bestBird, bestMove);
+              logger.info("Targetig Bird with {Action, Prob, Specie, shootLikeli, sum}: "
+                  + Integer.toString(bestBird)
+                  + " " + Integer.toString(bestMove)
+                  + " " + Double.toString(bestGuessProb)
+                  + " " + Integer.toString(bestIdx)
+                  + " " + Double.toString(highest_prob)
+                  + " " + Double.toString(maxSum));
+                  return new Action(bestBird, bestMove);
             }
 
         }
@@ -164,6 +175,8 @@ class Player {
             lGuess[i] = classifyBird(obs_sequence);
 
         }
+
+        System.err.println("Guessing: " + Arrays.toString(lGuess));
 
         return lGuess;
     }
