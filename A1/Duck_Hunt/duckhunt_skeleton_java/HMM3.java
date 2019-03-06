@@ -202,7 +202,7 @@ public class HMM3{
                     for (int t = 0; t < this.T - 1; t++) {
                         numerator += matrix_3D.get(t)[i][j];
                     }
-                    this.transition[i][j] = numerator/denominator;
+                    this.transition[i][j] = numerator/denominator;    //Might want to check if den = 0
                 }
             }
 
@@ -283,7 +283,6 @@ public class HMM3{
         }
 
         this.info = bar;
-        // System.err.println("Bar: " + Arrays.toString(bar));
 
     }
 

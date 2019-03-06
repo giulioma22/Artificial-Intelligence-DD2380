@@ -110,6 +110,9 @@ class Player {
             }
 
             //Shooting only if probability is high and it's not a black stork
+
+            System.out.println("maxSum is: " + max + "bestIdx is: " + bestIdx);
+
             if (maxSum > 0.7 && bestIdx != 5){
               logger.info("Targetig Bird with {Action, Prob, Specie, shootLikeli, sum}: "
                   + Integer.toString(bestBird)
@@ -186,7 +189,7 @@ class Player {
         double prob, max_prob;
 
         Random random = new Random();
-        bestIdx = random.nextInt(5);
+        bestIdx = random.nextInt(Constants.COUNT_SPECIES-1);
         max_prob = 0.0;
 
         Iterator<HMM3> iter;
@@ -249,11 +252,11 @@ class Player {
                 }
 
                 //Calculate the HMM model
-                HMM3 model = new HMM3(6, 9, 1, -1, null);
-                model.updateObsSeq(T, obs_sequence);
-                model.HMM_algorithm();
+                HMM3 second_model = new HMM3(6, 9, 1, -1, null);
+                second_model.updateObsSeq(T, obs_sequence);
+                second_model.HMM_algorithm();
 
-                HMM_list[pSpecies[i]].add(model);
+                HMM_list[pSpecies[i]].add(second_model);
 
             }
         }
