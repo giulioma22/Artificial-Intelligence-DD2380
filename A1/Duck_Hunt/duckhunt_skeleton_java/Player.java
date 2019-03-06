@@ -19,7 +19,7 @@ class Player {
         HMM_list = new ArrayList[Constants.COUNT_SPECIES];
         HMM3[] models = new HMM3[Constants.COUNT_SPECIES];
         for (int i = 0; i < Constants.COUNT_SPECIES; i++){
-            models[i] = new HMM3(6, 9, -1, null);
+            models[i] = new HMM3(Constants.COUNT_SPECIES, Constants.COUNT_MOVE, -1, null);
             HMM_list[i] = new ArrayList();
             HMM_list[i].add(models[i]);
         }
@@ -54,11 +54,12 @@ class Player {
             double highest_prob = -1;
             double bestGuessProb = -1;
 
+            //Iterate through the birds
             for (int i = 0; i < pState.getNumBirds(); i++) {
                 Bird bird = pState.getBird(i);
 
                 int T = 0;
-                int N = 5;
+                int N = 6;
                 int M = 9;
 
                 if (bird.isDead()){
@@ -103,9 +104,6 @@ class Player {
             }
 
             //Shooting only if probability is high and it's not a black stork
-
-            // System.err.println("maxSum is: " + maxSum + " bestIdx is: " + bestIdx);
-
             if (maxSum > 0.7 && bestIdx != 5){
                 return new Action(bestBird, bestMove);
             }
@@ -176,7 +174,7 @@ class Player {
 
             while(iter.hasNext()){
                 HMM3 placeholder = iter.next();
-                prob = placeholder.updateAlpha(obs_input);
+                prob = placeholder.alphaProb(obs_input);
                 if(prob > max_prob){
                     max_prob = prob;
                     bestIdx = i;
@@ -230,7 +228,7 @@ class Player {
                 }
 
                 //Calculate the HMM model
-                HMM3 model = new HMM3(6, 9, -1, null);
+                HMM3 model = new HMM3(Constants.COUNT_SPECIES, Constants.COUNT_MOVE, -1, null);
                 model.updateObsSeq(T, obs_sequence);
                 model.HMM_algorithm();
 
