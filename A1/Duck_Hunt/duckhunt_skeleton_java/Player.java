@@ -111,16 +111,16 @@ class Player {
 
             //Shooting only if probability is high and it's not a black stork
 
-            System.out.println("maxSum is: " + max + "bestIdx is: " + bestIdx);
+            // System.err.println("maxSum is: " + maxSum + " bestIdx is: " + bestIdx);
 
             if (maxSum > 0.7 && bestIdx != 5){
-              logger.info("Targetig Bird with {Action, Prob, Specie, shootLikeli, sum}: "
-                  + Integer.toString(bestBird)
-                  + " " + Integer.toString(bestMove)
-                  + " " + Double.toString(bestGuessProb)
-                  + " " + Integer.toString(bestIdx)
-                  + " " + Double.toString(highest_prob)
-                  + " " + Double.toString(maxSum));
+              // logger.info("Targetig Bird with {Action, Prob, Specie, shootLikeli, sum}: "
+              //     + Integer.toString(bestBird)
+              //     + " " + Integer.toString(bestMove)
+              //     + " " + Double.toString(bestGuessProb)
+              //     + " " + Integer.toString(bestIdx)
+              //     + " " + Double.toString(highest_prob)
+              //     + " " + Double.toString(maxSum));
                   return new Action(bestBird, bestMove);
             }
 
