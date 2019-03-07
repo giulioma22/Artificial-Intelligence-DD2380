@@ -91,6 +91,7 @@ class Player {
 
                 double probability = model.ShotProb();
 
+                //Probability = next move, best_prob = current bird
                 double sum = 0.8*probability + 0.2*best_prob;
 
                 if (sum > maxSum){

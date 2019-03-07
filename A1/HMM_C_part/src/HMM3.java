@@ -174,7 +174,9 @@ public class HMM3 {
             }
         }
 
+        System.err.println("Number of iterations: " + iters);
         printmatrix2string(transition);
+        System.err.println();
         printmatrix2string(emission);
 
     }

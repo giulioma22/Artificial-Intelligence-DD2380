@@ -182,7 +182,7 @@ public class HMM3{
                 this.initial_prob[i] = gamma[0][i];
             }
 
-            //For the validate function
+            //Copying last row of gamma - prob of seing each state given the obs seq
             this.lastdist = new double [1][N];
             for(int i = 0; i < N; i++){
                 this.lastdist[0][i] = gamma[T-1][i];
@@ -245,6 +245,7 @@ public class HMM3{
 
     // - - - - - - - - - - - - - - - - - - -
 
+    //Returns vector with all states
     public void validate(){
 
         double[] foo = new double[N];
